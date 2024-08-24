@@ -9,7 +9,11 @@
     "hd": "npx hardhat deploy --network",
     "setpw": "npx env-enc set-pw",
     "setvar": "npx env-enc set",
-    "view": "npx env-enc view"
+    "view": "npx env-enc view",
+    "mint-approve": "npx hardhat run scripts/mint-approve.js --network",
+    "add-liquidity": "npx hardhat run scripts/add-liquidity.js --network",
+    "withdraw-liquidity": "npx hardhat run scripts/withdraw-liquidity.js --network",
+    "swap": "npx hardhat run scripts/swap.js --network"
   },
   "author": "Anton",
   "license": "ISC",
