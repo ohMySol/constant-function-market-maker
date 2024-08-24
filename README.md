@@ -1,0 +1,2 @@
+# Constant Function Market Maker(CFMM) with fhEVM features.
+This project showing implementation of the constant product market maker(CPMM) which on the types of the general automated market maker(AMM) type - constant function market maker(CFMM) with extended features of fully homomorphic encryption(FHE). For HFE the project using fhEVM library.
