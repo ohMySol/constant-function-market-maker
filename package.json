@@ -1,7 +1,7 @@
 {
   "name": "cfmm",
   "version": "1.0.0",
-  "description": "CFMM + fhEVM",
+  "description": "CFMM",
   "main": "index.js",
   "scripts": {
     "node": "npx hardhat node",
@@ -10,10 +10,10 @@
     "setpw": "npx env-enc set-pw",
     "setvar": "npx env-enc set",
     "view": "npx env-enc view",
-    "mint-approve": "npx hardhat run scripts/mint-approve.js --network",
-    "add-liquidity": "npx hardhat run scripts/add-liquidity.js --network",
-    "withdraw-liquidity": "npx hardhat run scripts/withdraw-liquidity.js --network",
-    "swap": "npx hardhat run scripts/swap.js --network"
+    "mint-approve": "npx hardhat run contract-scripts/mint-approve.js --network",
+    "add-liquidity": "npx hardhat run contract-scripts/add-liquidity.js --network",
+    "withdraw-liquidity": "npx hardhat run contract-scripts/withdraw-liquidity.js --network",
+    "swap": "npx hardhat run contract-scripts/swap.js --network"  
   },
   "author": "Anton",
   "license": "ISC",
@@ -46,6 +46,7 @@
   "dependencies": {
     "@chainlink/env-enc": "^1.0.5",
     "@openzeppelin/contracts": "^5.0.2",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "fhevm": "^0.5.8"
   }
 }
