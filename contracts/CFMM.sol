@@ -88,7 +88,7 @@ contract CFMM is CfmmErrors {
             shares = _sqrt(_amountA * _amountB);
         } else {
             shares = _min(
-                (_amountA * _totalSharesSupply / reserveA),
+                (_amountA * _totalSharesSupply) / reserveA,
                 (_amountB * _totalSharesSupply) / reserveB
             );
         }
