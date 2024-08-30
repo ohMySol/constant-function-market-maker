@@ -37,7 +37,7 @@ const networkName = network.name;
             liquidityB = 500;
         })
         
-        it("User add liquidity(tokenA and tokenB)", async () => {
+        it("Add liquidity(tokenA and tokenB)", async () => {
             await mint_approve(tokenA, tokenB, liquidityA, liquidityB);
             await cfmm.addLiquidity(liquidityA, liquidityB);
             expect(await cfmm.reserveA()).to.equal(liquidityA);
@@ -96,7 +96,7 @@ const networkName = network.name;
             liquidityB = 500;
         })
         
-        it("User withdraw liquidity and update shares balance", async () => {
+        it("Withdraw liquidity and update shares balance", async () => {
             await mint_approve(tokenA, tokenB, liquidityA, liquidityB);
             await cfmm.addLiquidity(liquidityA, liquidityB);
             const shares = await cfmm.getShares();
@@ -104,7 +104,7 @@ const networkName = network.name;
             expect(await cfmm.getShares()).to.equal(0);
         });
  
-        it("User withdraw liquidity and update reserves", async () => {
+        it("Withdraw liquidity and update reserves", async () => {
             await mint_approve(tokenA, tokenB, liquidityA, liquidityB);
             await cfmm.addLiquidity(liquidityA, liquidityB);
             const [reserveAbefore, reserveBbefore] = await cfmm.getReserves();
@@ -120,7 +120,7 @@ const networkName = network.name;
             expect(Number(reserveBafter)).to.equal(Number(reserveBbefore) - expectedTokenBreturnedAmount);
         });
         
-        it("User withdraw liquidityand and update totalSharesSupply", async () => {
+        it("Withdraw liquidityand and update totalSharesSupply", async () => {
             await mint_approve(tokenA, tokenB, liquidityA, liquidityB);
             await cfmm.connect(alice).addLiquidity(liquidityA, liquidityB);
             await mint_approve(tokenA, tokenB, 2000, 1000, bob);
@@ -134,6 +134,67 @@ const networkName = network.name;
         it("Revert if not enough shares provided for withdraw", async () => {
             await expect(cfmm.withdrawLiquidity(0)).to.be.revertedWithCustomError(
                 cfmm, "CFMM_NotEnoughShares"
+            );
+        });
+    });
+
+    describe("Swap liquidity tests", () => {
+        let liquidityA, liquidityB;
+
+        beforeEach("Set up liquidity", async() => {
+            liquidityA = 1000;
+            liquidityB = 500;
+        })
+        
+        it("Swap tokenA for tokenB", async () => {
+            await mint_approve(tokenA, tokenB, liquidityA, liquidityB);
+            await cfmm.connect(alice).addLiquidity(liquidityA, liquidityB);
+            await mint_approve(tokenA, tokenB, liquidityA, liquidityB, bob);
+            
+            const feePercentage = 0.3;
+            const amountIn = 500;
+            const fee = (amountIn * feePercentage) / 100;
+            const amountInAfterFee = amountIn - fee;
+            
+            const reserveIn = Number(await cfmm.reserveA());
+            const reserveOut = Number(await cfmm.reserveB());
+            const bobTokenBbalanceBeforeSwap = Number(await tokenB.connect(bob).balanceOf(bob.address));
+            const bobCalculatedAmountOut = Math.floor((reserveOut * amountInAfterFee) / (reserveIn + amountInAfterFee));
+            await cfmm.connect(bob).swap(tokenA.target, amountIn);
+            const bobTokenBbalanceAftereSwap = Number(await tokenB.connect(bob).balanceOf(bob.address))
+            expect(bobTokenBbalanceAftereSwap).to.equal(bobTokenBbalanceBeforeSwap + bobCalculatedAmountOut);
+        });
+
+        it("Update reserves after swap", async () => {
+            await mint_approve(tokenA, tokenB, liquidityA, liquidityB);
+            await cfmm.connect(alice).addLiquidity(liquidityA, liquidityB);
+            await mint_approve(tokenA, tokenB, liquidityA, liquidityB, bob);
+
+            const feePercentage = 0.3;
+            const amountIn = 500;
+            const fee = (amountIn * feePercentage) / 100;
+            const amountInAfterFee = amountIn - fee;
+            
+            const reserveIn = Number(await cfmm.reserveA());
+            const reserveOut = Number(await cfmm.reserveB());
+            const bobCalculatedAmountOut = Math.floor((reserveOut * amountInAfterFee) / (reserveIn + amountInAfterFee));
+            await cfmm.connect(bob).swap(tokenA.target, amountIn);
+            expect(await cfmm.reserveA()).to.equal(reserveIn + amountIn);
+            expect(await cfmm.reserveB()).to.equal(reserveOut - bobCalculatedAmountOut);
+        });
+
+        it("Revert if tokenIn is usupported address", async () => {
+            const amountIn = 500;
+            const unsupportedTokenAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+            await expect(cfmm.swap(unsupportedTokenAddress, amountIn)).to.be.revertedWithCustomError(
+                cfmm, "CFMM_UnsupportedTokenAddress"
+            );
+        });
+
+        it("Revert if amountIn is not enough", async () => {
+            const amountIn = 0;
+            await expect(cfmm.swap(tokenA.target, amountIn)).to.be.revertedWithCustomError(
+                cfmm, "CFMM_InsufficientAmountIn"
             );
         });
     });
