@@ -1,6 +1,6 @@
 const { expect } = require("chai");
-const { network } = require("hardhat");
-const { devNetworks, getContractInstance, getSigner } = require("../../utils/helpers/helper-hardhat");
+const { ethers, deployments, network } = require("hardhat");
+const { devNetworks } = require("../../utils/helpers/helper-hardhat");
 require("dotenv").config();
 const networkName = network.name;
 
@@ -8,11 +8,13 @@ const networkName = network.name;
 !devNetworks.includes(networkName)
 ? describe.skip
 :describe("Testing TokenA contract", function() {
-   let contract, signer2
+   let Contract, contract, alice, bob
 
     beforeEach("Set up a contract for testing", async () => {
-        contract = await getContractInstance(networkName, 'TokenA');
-        signer2 = await getSigner(networkName, process.env.PRIVATE_KEY_LOCAL2);
+        [alice, bob] = await ethers.getSigners();
+        await deployments.fixture(["token"]) 
+        Contract = (await deployments.get("TokenA")).address;
+        contract = await ethers.getContractAt("TokenA", Contract) 
     });
 
     describe("Constructor tests", () => {
@@ -24,30 +26,32 @@ const networkName = network.name;
 
     describe("Mint function tests", () => {
         it("Mint tokens", async () => {
-            const signer = await getSigner(networkName);
+            const signer = alice.address;
             await contract.mint(1000);
-            expect(await contract.balanceOf(signer.address)).to.equal(1000);
+            expect(await contract.balanceOf(signer)).to.equal(1000);
             expect(await contract.totalSupply()).to.equal(1000);
         });
     });
 
     describe("Approve function tests", () => {
         it("Approve tokens", async () => {
-            const signer = await getSigner(networkName);
-            const spender = signer2.address;
+            const signer = alice.address;
+            const spender = bob.address;
             await contract.approve(spender, 1000);
-            expect(await contract.allowance(signer.address, spender)).to.equal(1000);
+            expect(await contract.allowance(signer, spender)).to.equal(1000);
         });
     });
 
     describe("TransferFrom function tests", () => {
         it("TransferFrom tokens", async () => {
-            const signer = await getSigner(networkName);
-            const spender = signer2.address;
-            await contract.connect(signer2).transferFrom(signer.address, spender, 500);
-            expect(await contract.balanceOf(signer.address)).to.equal(500);
+            const signer = alice.address;
+            const spender = bob.address;
+            await contract.mint(1000);
+            await contract.approve(spender, 1000);
+            await contract.connect(bob).transferFrom(signer, spender, 500);
+            expect(await contract.balanceOf(signer)).to.equal(500);
             expect(await contract.balanceOf(spender)).to.equal(500);
-            expect(await contract.allowance(signer.address, spender)).to.equal(500);
+            expect(await contract.allowance(signer, spender)).to.equal(500);
         });
     });
 })
