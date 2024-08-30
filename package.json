@@ -4,6 +4,7 @@
   "description": "CFMM",
   "main": "index.js",
   "scripts": {
+    "nm-test": "nodemon --watch test --exec 'npx hardhat test'",
     "node": "npx hardhat node",
     "ht": "npx hardhat test",
     "hd": "npx hardhat deploy --network",
