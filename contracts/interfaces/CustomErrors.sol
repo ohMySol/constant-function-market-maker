@@ -31,11 +31,17 @@ interface CfmmErrors {
      * @dev Error indicates that after shares calculation in `addLiquidity` function,
      * the calculated amount is <= 0.
      */
-    error CFMM_NotEnoughShares();
+    error CFMM_NotEnoughLiquidity();
 
     /**
      * @dev Error indicates that after return amount calculation in `addLiquidity` function,
      * return amount for `amountA` and `amountB` is <= 0.
      */
     error CFMM_InsufficientLiquidityReturnAmount();
+
+    /**
+     * @dev Error indicates that user set <= 0 shares value as an argument in withdrawLiquidity
+     * function.
+     */
+    error CFMM_NotEnoughShares();
 }
