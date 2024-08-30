@@ -7,12 +7,10 @@ import {CfmmErrors} from "../contracts/interfaces/CustomErrors.sol";
 contract CFMM is CfmmErrors {
     IERC20 public immutable tokenA;
     IERC20 public immutable tokenB;
-    // Reserve variables storing amount or tokens(A, B) in the contract.
     uint256 public reserveA;
     uint256 public reserveB;
-    // When user remove or provide liquidity, we need to mint or burn shares(LP tokens).
     uint256 public totalSharesSupply;
-    // Store a `uint256` share balance fro each `address`.
+    
     mapping(address => uint256) public shareBalance;
 
     constructor(address _tokenA, address _tokenB) {
@@ -86,7 +84,7 @@ contract CFMM is CfmmErrors {
         // Mint LP tokens(shares)(first calculate how much shares to mint)
         // Formulas: 1. Total liquidity = f(x, y) = sqrt(x, y)
         // 2. Shares to mint = dx / x * T = dy / y * T 
-        if (_totalSharesSupply == 0) { // check if liquidity Already exist, if yes apply(sqrt(x, y))
+        if (_totalSharesSupply == 0) {
             shares = _sqrt(_amountA * _amountB);
         } else {
             shares = _min(
@@ -95,7 +93,7 @@ contract CFMM is CfmmErrors {
             );
         }
         if (shares <= 0 ) {
-            revert CFMM_NotEnoughShares();
+            revert CFMM_NotEnoughLiquidity();
         }
         _mintShares(msg.sender, shares);
         // Update reserves(updating them internally from security reasons, to not allow users to mint more shares they can and manipulate with the price)
@@ -110,6 +108,9 @@ contract CFMM is CfmmErrors {
      * update reserves with new balances and transfer `amountA` and `amountB` to `msg.sender`.
      */
     function withdrawLiquidity(uint256 _shares) external returns (uint256 amountA, uint256 amountB) {
+        if (_shares <= 0) {
+            revert CFMM_NotEnoughShares();
+        }
         // Calculate the amountA and amountB of tokens for withdraw(should be proportional to shares)
         // Formulas: 1. dx = s / T * x
         // 2. dy = s / T * y
