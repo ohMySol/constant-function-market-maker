@@ -35,10 +35,6 @@ contract CFMM is CfmmErrors {
         if (_amountIn <= 0) {
             revert CFMM_InsufficientAmountIn();
         }
-
-        uint256 balanceA;
-        uint256 balanceB;
-
         (
             IERC20 tokenIn, 
             IERC20 tokenOut, 
@@ -56,8 +52,8 @@ contract CFMM is CfmmErrors {
         }
         tokenOut.transfer(msg.sender, amountOut);
         // 4. Upd reserves
-        balanceA = tokenA.balanceOf(address(this));
-        balanceB = tokenB.balanceOf(address(this));
+        uint256 balanceA = tokenA.balanceOf(address(this));
+        uint256 balanceB = tokenB.balanceOf(address(this));
         _updateReserves(balanceA, balanceB);
     }
 
