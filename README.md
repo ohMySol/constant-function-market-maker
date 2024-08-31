@@ -43,7 +43,7 @@ Also, here is a guide, how to install env-enc and how to use it: [env-enc-guide]
 ### 5. Withdraw liquidity.
 5.1 Run command `npm run withdraw-liquidity localhost`. This will withdraw your tokenA and tokenB liquidity from the AMM back to user balance. Keep in mind if you did already a swap before withdrawing a liquidity, then you'll receive back new values calculated based on your shares amount and reserves in the liquidity pool.
 
-## Running The Project(tenderly virtual network)
+## Running The Project(Tenderly virtual network)
 ### 1. Start a local node.
 1.1 Run command `npm run node`.
 
